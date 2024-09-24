@@ -1,0 +1,121 @@
+name: Dev checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "assets/**"
+      - "**.md"
+      - ".gitignore"
+      - "docker/**"
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "assets/**"
+      - "**.md"
+      - ".gitignore"
+      - "docker/**"
+  workflow_dispatch:
+
+concurrency:
+  group: dev-checks-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commit-check:
+    runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'push' }}
+    timeout-minutes: 5
+    steps:
+      - name: Check Commit Type
+        uses: gsactions/commit-message-checker@v2
+        with:
+          pattern: '^(feat|fix|docs|style|refactor|chore|perf|test|build|ci|revert)(\(\S+\))?: .+'
+          error: "Invalid commit type"
+          excludeDescription: "true"
+          excludeTitle: "false"
+          checkAllCommitMessages: "true"
+          accessToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Commit Message
+        uses: gsactions/commit-message-checker@v2
+        with:
+          pattern: '^.+: [^A-Z].+[^\.](\n.*)*$'
+          error: 'Invalid commit message: first letter capitalized, less than 3 letter, end with "."'
+          excludeDescription: "true"
+          excludeTitle: "true"
+          checkAllCommitMessages: "true"
+          accessToken: ${{ secrets.GITHUB_TOKEN }}
+
+  format-check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    container:
+      image: ghcr.io/${{ github.repository }}/runner:latest
+    steps:
+      - run: git config --global --add safe.directory '*'
+      - uses: actions/checkout@v4
+      - name: Check Go format
+        working-directory: go
+        run: |
+          if [ -n "$(gofmt -d .)" ]; then
+            echo "Formatting issues found. Please run gofmt."
+            exit 1
+          fi
+      - name: Check Python format
+        working-directory: python
+        run: |
+          black --check .
+      - name: Check Rust format
+        working-directory: rust
+        run: |
+          cargo fmt --check 2>/dev/null
+
+  typo-check:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/${{ github.repository }}/runner:latest
+    timeout-minutes: 5
+    steps:
+      - run: git config --global --add safe.directory '*'
+      - uses: actions/checkout@v4
+      - uses: crate-ci/typos@master
+
+  deny-check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - run: git config --global --add safe.directory '*'
+      - uses: actions/checkout@v4
+      - run: cd rust
+      - uses: EmbarkStudios/cargo-deny-action@v1
+        with:
+          manifest-path: rust/Cargo.toml
+          arguments: --all-features
+          command: check licenses sources bans
+
+  toml-check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    container:
+      image: ghcr.io/${{ github.repository }}/runner:latest
+    steps:
+      - run: git config --global --add safe.directory '*'
+      - uses: actions/checkout@v4
+      - run: taplo format --check --diff
+
+  clippy-check:
+    runs-on:
+      group: github-amd64-8c32g
+    timeout-minutes: 15
+    container:
+      image: ghcr.io/${{ github.repository }}/runner:latest
+    steps:
+      - run: git config --global --add safe.directory '*'
+      - uses: actions/checkout@v4
+      - run: ls
+      - run: pwd
+      - run: rustup toolchain list
+      - working-directory: rust
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings

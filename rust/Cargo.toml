@@ -1,0 +1,25 @@
+[package]
+name = "rust-examples"
+version = "1.0.0"
+edition = "2021"
+license = "Apache-2.0"
+default-run = "main"
+
+[[bin]]
+name = "main"
+path = "bin/main.rs"
+
+[dependencies]
+anyhow = "1.0"
+arrow-array = { version = "52.2", features = ["chrono-tz"] }
+arrow-cast = { version = "52.2", features = ["prettyprint"] }
+arrow-flight = { version = "52.2", features = [
+    "flight-sql-experimental",
+    "tls",
+] }
+arrow-schema = "52.2"
+chrono = "0.4"
+futures = "0.3"
+regex = "1.10"
+tokio = { version = "1.40", features = ["full"] }
+tonic = "0.11"

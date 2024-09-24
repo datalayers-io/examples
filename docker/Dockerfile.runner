@@ -1,0 +1,24 @@
+FROM rust:1.81
+
+COPY . /examples
+WORKDIR /examples
+
+ENV PATH=$PATH:/usr/local/go/bin
+ENV PATH=$PATH:/usr/local/cargo/bin
+
+# Download, install, and build dependencies for all languages.
+RUN TZ=Asia/Shanghai DEBIAN_FRONTEND=noninteractive apt-get -y update && \
+    TZ=Asia/Shanghai DEBIAN_FRONTEND=noninteractive apt-get -y install \
+    git \
+    wget \
+    curl \
+    netcat-traditional \
+    jq \
+    make \
+    gcc && \
+    make build && \
+    pip3 install --break-system-packages black && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN cargo install --locked taplo-cli
