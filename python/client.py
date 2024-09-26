@@ -1,13 +1,11 @@
 from collections import OrderedDict
 from typing import Optional
 
-import flightsql.flightsql_pb2 as flightsql_pb
 import pandas
 import pyarrow as pa
 import pyarrow.flight as flight
 from flightsql import FlightSQLClient
 from flightsql.client import PreparedStatement
-from google.protobuf import any_pb2
 
 
 class ClientConfig:
@@ -118,37 +116,7 @@ class Client:
         Binds the `binding` record batch with the prepared statement and requests the server to execute the statement.
         """
 
-        #! Since the flightsql-dbapi library misses setting options for do_put, we have to manually pass in the options.
-        #! We have filed a pull request to fix this issue. When the PR is merged and a new release of the flightsql-dbapi library is published,
-        #! the codes could be simplified to:
-        #!
-        #! ``` Python
-        #! flight_info = prepared_stmt.execute(binding)
-        #! ticket = flight_info.endpoints[0].ticket
-        #! reader = self.inner.do_get(ticket)
-        #! df = reader.read_pandas()
-        #! return df
-        #! ```
-
-        # Creates a flight descriptor from the command.
-        cmd = flightsql_pb.CommandPreparedStatementQuery(
-            prepared_statement_handle=prepared_stmt.handle
-        )
-        any = any_pb2.Any()
-        any.Pack(cmd)
-        desc = flight.FlightDescriptor.for_command(any.SerializeToString())
-
-        # Writes the binding to the Datalayers server through the do_put interface.
-        if binding is not None and binding.num_rows > 0:
-            writer, reader = self.inner.client.do_put(
-                desc, binding.schema, prepared_stmt.options
-            )
-            writer.write(binding)
-            writer.done_writing()
-            reader.read()
-
-        # Executes the prepared statement and retrieves the execution result.
-        flight_info = self.inner.client.get_flight_info(desc, prepared_stmt.options)
+        flight_info = prepared_stmt.execute(binding)
         ticket = flight_info.endpoints[0].ticket
         reader = self.inner.do_get(ticket)
         df = reader.read_pandas()
