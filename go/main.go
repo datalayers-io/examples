@@ -147,4 +147,40 @@ func main() {
 	//    2024-09-01 10:05:00 +0800 CST     2   15.30      1
 	//    2024-09-02 10:05:00 +0800 CST     2   15.30      1
 	PrintRecords(result)
+
+	// Closes the prepared statement to notify releasing resources on server side.
+	if err = client.ClosePrepared(preparedStmt); err != nil {
+		fmt.Println("Failed to close a prepared statement: ", err)
+		return
+	}
+
+	// There provides a dedicated interface `execute_update` for executing DMLs, including Insert, Delete.
+	// This interface directly returns the affected rows which might be convenient for some use cases.
+	//
+	// Note, Datalayers does not support Update and the development for Delete is in progress.
+	sql = `
+        INSERT INTO go.demo (ts, sid, value, flag) VALUES
+            ('2024-09-03T10:00:00+08:00', 1, 4.5, 0),
+            ('2024-09-03T10:05:00+08:00', 2, 11.6, 1);`
+	affectedRows, err := client.ExecuteUpdate(sql)
+	if err != nil {
+		fmt.Println("Failed to insert data: ", err)
+		return
+	}
+	// The output should be:
+	// Affected rows: 2
+	fmt.Println("Affected rows: ", affectedRows)
+
+	// Checks that the data are inserted successfully.
+	sql = "SELECT * FROM go.demo where ts >= '2024-09-03T10:00:00+08:00'"
+	result, err = client.Execute(sql)
+	if err != nil {
+		fmt.Println("Failed to scan data: ", err)
+		return
+	}
+	// The result should be:
+	// 	                              ts   sid   value   flag
+	//    2024-09-03 10:00:00 +0800 CST     1    4.50      0
+	//    2024-09-03 10:05:00 +0800 CST     2   11.60      1
+	PrintRecords(result)
 }
