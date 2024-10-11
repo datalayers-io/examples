@@ -162,14 +162,17 @@ func main() {
         INSERT INTO go.demo (ts, sid, value, flag) VALUES
             ('2024-09-03T10:00:00+08:00', 1, 4.5, 0),
             ('2024-09-03T10:05:00+08:00', 2, 11.6, 1);`
-	affectedRows, err := client.ExecuteUpdate(sql)
+	_, err = client.ExecuteUpdate(sql)
 	if err != nil {
 		fmt.Println("Failed to insert data: ", err)
 		return
 	}
+	// It's expected that the affected rows is 2.
+	// However, the Go implementation of Arrow Flight SQL client might have some flaws and the affected rows is always 0.
+	//
 	// The output should be:
 	// Affected rows: 2
-	fmt.Println("Affected rows: ", affectedRows)
+	// fmt.Println("Affected rows: ", affectedRows)
 
 	// Checks that the data are inserted successfully.
 	sql = "SELECT * FROM go.demo where ts >= '2024-09-03T10:00:00+08:00'"
