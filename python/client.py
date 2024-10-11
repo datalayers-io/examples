@@ -102,6 +102,15 @@ class Client:
         df = reader.read_pandas()
         return df
 
+    def execute_update(self, sql: str) -> int:
+        """
+        Executes the sql on Datalayers and returns the affected rows.
+        This method is meant to be used for executing DMLs, including Insert and Delete.
+        Note, Datalayers does not support Update and the development of Delete is in progress.
+        """
+
+        return self.inner.execute_update(sql, None)
+
     def prepare(self, sql: str) -> PreparedStatement:
         """
         Creates a prepared statement.
@@ -121,6 +130,15 @@ class Client:
         reader = self.inner.do_get(ticket)
         df = reader.read_pandas()
         return df
+
+    def close_prepared(self, prepared_stmt: PreparedStatement):
+        """
+        Closes the prepared statement.
+        Note, generally you should not call this method explicitly.
+        Use with clause to manage the life cycle of a prepared statement instead.
+        """
+
+        prepared_stmt.close()
 
     def close(self):
         """
