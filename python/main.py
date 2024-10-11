@@ -115,7 +115,7 @@ def main():
             ('2024-09-03T10:05:00+08:00', 2, 11.6, 1);
         """
     #! It's expected that the affected rows is 2.
-    #! However, the flightsql-dbapi library does not implement the `execute_update` correctly
+    #! However, the flightsql-dbapi library seems does not implement the `execute_update` correctly
     #! and the returned affected rows is always 0.
     affected_rows = client.execute_update(sql)
     # The output should be:
