@@ -102,6 +102,16 @@ func (client *Client) Execute(sql string) ([]arrow.Record, error) {
 	return client.doGet(flightInfo.GetEndpoint()[0].GetTicket())
 }
 
+// Executes the sql on Datalayers and returns the affected rows.
+// The supported sqls are Insert and Delete. Note, the development for supporting Delete is in progress.
+func (client *Client) ExecuteUpdate(sql string) (int64, error) {
+	affectedRows, err := client.inner.ExecuteUpdate(client.ctx, sql)
+	if err != nil {
+		return 0, fmt.Errorf("failed to execute a sql: %v", err)
+	}
+	return affectedRows, nil
+}
+
 // Creates a prepared statement.
 func (client *Client) Prepare(sql string) (*flightsql.PreparedStatement, error) {
 	return client.inner.Prepare(client.ctx, sql)
@@ -117,6 +127,11 @@ func (client *Client) ExecutePrepared(preparedStmt *flightsql.PreparedStatement,
 		return nil, fmt.Errorf("failed to execute a prepared statement: %v", err)
 	}
 	return client.doGet(flightInfo.GetEndpoint()[0].GetTicket())
+}
+
+// Closes the prepared statement.
+func (client *Client) ClosePrepared(preparedStmt *flightsql.PreparedStatement) error {
+	return preparedStmt.Close(client.ctx)
 }
 
 // Calls the `DoGet` method of the FlightSQL client.
