@@ -19,7 +19,7 @@ func PrintAffectedRows(records []arrow.Record) {
 	defer releaseRecords(records)
 
 	// By Datalayers' design, the affected rows is the value at the first row and the first column.
-	affectedRows := records[0].Column(0).(*array.String).Value(0)
+	affectedRows := records[0].Column(0).(*array.Int64).Value(0)
 	fmt.Println("Affected rows: ", affectedRows)
 }
 

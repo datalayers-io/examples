@@ -5,7 +5,7 @@ import pyarrow as pa
 
 
 def print_affected_rows(df: pandas.DataFrame) -> int:
-    print("Affected rows: {}".format(df["Count"][0]))
+    print("Affected rows: {}".format(df["affected_rows"][0]))
 
 
 def make_insert_binding() -> pa.RecordBatch:

@@ -2,7 +2,7 @@ use std::process::exit;
 use std::sync::Arc;
 
 use arrow_array::{
-    Float32Array, Int32Array, Int8Array, RecordBatch, StringArray, TimestampMillisecondArray,
+    Float32Array, Int32Array, Int64Array, Int8Array, RecordBatch, TimestampMillisecondArray,
 };
 use arrow_cast::pretty::pretty_format_batches;
 use arrow_schema::{DataType, Field, Schema, TimeUnit};
@@ -30,12 +30,9 @@ pub fn print_affected_rows(batches: &[RecordBatch]) {
         .unwrap()
         .column(0)
         .as_any()
-        .downcast_ref::<StringArray>()
+        .downcast_ref::<Int64Array>()
         .unwrap()
-        .value(0)
-        .to_string()
-        .parse::<u32>()
-        .unwrap();
+        .value(0);
     println!("Affected rows: {}", affected_rows);
 }
 
