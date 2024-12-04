@@ -21,8 +21,7 @@ concurrency:
 
 jobs:
   build-runner:
-    runs-on:
-      group: github-amd64-8c32g
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
       - run: sudo chown -R $(whoami) .
