@@ -117,5 +117,34 @@ async fn main() -> Result<()> {
     // +---------------------------+-----+-------+------+
     print_batches(&result);
 
+    // Closes the prepared statement to notify releasing resources on server side.
+    client.close_prepared(prepared_stmt).await?;
+
+    // There provides a dedicated interface `execute_update` for executing DMLs, including Insert, Delete.
+    // This interface directly returns the affected rows which might be convenient for some use cases.
+    //
+    // Note, Datalayers does not support Update and the development for Delete is in progress.
+    sql = r#"
+        INSERT INTO rust.demo (ts, sid, value, flag) VALUES
+            ('2024-09-03T10:00:00+08:00', 1, 4.5, 0),
+            ('2024-09-03T10:05:00+08:00', 2, 11.6, 1);
+    "#;
+    let affected_rows = client.execute_update(sql).await?;
+    // The output should be:
+    // Affected rows: 2
+    println!("Affected rows: {}", affected_rows);
+
+    // Checks that the data are inserted successfully.
+    sql = "SELECT * FROM rust.demo where ts >= '2024-09-03T10:00:00+08:00'";
+    result = client.execute(sql).await?;
+    // The result should be:
+    // +---------------------------+-----+-------+------+
+    // | ts                        | sid | value | flag |
+    // +---------------------------+-----+-------+------+
+    // | 2024-09-03T10:00:00+08:00 | 1   | 4.5   | 0    |
+    // | 2024-09-03T10:05:00+08:00 | 2   | 11.6  | 1    |
+    // +---------------------------+-----+-------+------+
+    print_batches(&result);
+
     Ok(())
 }
