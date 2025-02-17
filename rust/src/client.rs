@@ -64,7 +64,7 @@ impl Client {
             .handshake(&config.username, &config.password)
             .await
             .inspect_err(|e| {
-                println!("Failed to do handshake: {}", filter_message(&e.to_string()));
+                println!("{}", filter_message(&e.to_string()));
                 exit(1)
             });
 
@@ -83,10 +83,7 @@ impl Client {
             .execute(sql.to_string(), None)
             .await
             .inspect_err(|e| {
-                println!(
-                    "Failed to execute a sql: {}",
-                    filter_message(&e.to_string())
-                );
+                println!("{}", filter_message(&e.to_string()));
                 exit(1)
             })?;
         let ticket = flight_info
@@ -100,16 +97,25 @@ impl Client {
         Ok(batches)
     }
 
+    pub async fn execute_update(&mut self, sql: &str) -> Result<i64> {
+        let affected_rows = self
+            .inner
+            .execute_update(sql.to_string(), None)
+            .await
+            .inspect_err(|e| {
+                println!("{}", filter_message(&e.to_string()));
+                exit(1)
+            })?;
+        Ok(affected_rows)
+    }
+
     pub async fn prepare(&mut self, sql: &str) -> Result<PreparedStatement<Channel>> {
         let prepared_stmt = self
             .inner
             .prepare(sql.to_string(), None)
             .await
             .inspect_err(|e| {
-                println!(
-                    "Failed to execute a sql: {}",
-                    filter_message(&e.to_string())
-                );
+                println!("{}", filter_message(&e.to_string()));
                 exit(1)
             })?;
         Ok(prepared_stmt)
@@ -124,10 +130,7 @@ impl Client {
             .set_parameters(binding)
             .context("Failed to bind a record batch to the prepared statement")?;
         let flight_info = prepared_stmt.execute().await.inspect_err(|e| {
-            println!(
-                "Failed to execute the prepared statement: {}",
-                filter_message(&e.to_string())
-            );
+            println!("{}", filter_message(&e.to_string()));
             exit(1)
         })?;
         let ticket = flight_info
@@ -141,19 +144,20 @@ impl Client {
         Ok(batches)
     }
 
+    pub async fn close_prepared(&self, prepared_stmt: PreparedStatement<Channel>) -> Result<()> {
+        prepared_stmt
+            .close()
+            .await
+            .context("Failed to close a prepared statement")
+    }
+
     async fn do_get(&mut self, ticket: Ticket) -> Result<Vec<RecordBatch>> {
         let stream = self.inner.do_get(ticket).await.inspect_err(|e| {
-            println!(
-                "Failed to perform do_get: {}",
-                filter_message(&e.to_string())
-            );
+            println!("{}", filter_message(&e.to_string()));
             exit(1)
         })?;
         let batches = stream.try_collect::<Vec<_>>().await.inspect_err(|e| {
-            println!(
-                "Failed to consume flight record batch stream: {}",
-                filter_message(&e.to_string())
-            );
+            println!("{}", filter_message(&e.to_string()));
             exit(1)
         })?;
         if batches.is_empty() {

@@ -105,6 +105,29 @@ def main():
         # 1 2024-09-02 10:05:00+08:00    2   15.3     1
         print(result)
 
+    # There provides a dedicated interface `execute_update` for executing DMLs, including Insert, Delete.
+    # This interface directly returns the affected rows which might be convenient for some use cases.
+    #
+    # Note, Datalayers does not support Update and the development for Delete is in progress.
+    sql = """
+        INSERT INTO python.demo (ts, sid, value, flag) VALUES
+            ('2024-09-03T10:00:00+08:00', 1, 4.5, 0),
+            ('2024-09-03T10:05:00+08:00', 2, 11.6, 1);
+        """
+    affected_rows = client.execute_update(sql)
+    # The output should be:
+    # Affected rows: 2
+    print("Affected rows: {}".format(affected_rows))
+
+    # Checks that the data are inserted successfully.
+    sql = "SELECT * FROM python.demo where ts >= '2024-09-03T10:00:00+08:00'"
+    result = client.execute(sql)
+    # The result should be:
+    #                          ts  sid  value  flag
+    # 0 2024-09-03 10:00:00+08:00    1    4.5     0
+    # 1 2024-09-03 10:05:00+08:00    2   11.6     1
+    print(result)
+
 
 if __name__ == "__main__":
     main()
