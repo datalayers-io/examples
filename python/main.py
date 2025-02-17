@@ -114,13 +114,10 @@ def main():
             ('2024-09-03T10:00:00+08:00', 1, 4.5, 0),
             ('2024-09-03T10:05:00+08:00', 2, 11.6, 1);
         """
-    #! It's expected that the affected rows is 2.
-    #! However, the flightsql-dbapi library seems does not implement the `execute_update` correctly
-    #! and the returned affected rows is always 0.
     affected_rows = client.execute_update(sql)
     # The output should be:
     # Affected rows: 2
-    # print("Affected rows: {}".format(affected_rows))
+    print("Affected rows: {}".format(affected_rows))
 
     # Checks that the data are inserted successfully.
     sql = "SELECT * FROM python.demo where ts >= '2024-09-03T10:00:00+08:00'"
