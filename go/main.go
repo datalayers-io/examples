@@ -183,4 +183,6 @@ func main() {
 	//    2024-09-03 10:00:00 +0800 CST     1    4.50      0
 	//    2024-09-03 10:05:00 +0800 CST     2   11.60      1
 	PrintRecords(result)
+
+	fmt.Println("\nFinished, thank you!")
 }

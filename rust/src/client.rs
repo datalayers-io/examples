@@ -2,11 +2,11 @@ use std::{process::exit, str::FromStr, time::Duration};
 
 use crate::util::filter_message;
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use arrow_array::RecordBatch;
 use arrow_flight::{
-    sql::client::{FlightSqlServiceClient, PreparedStatement},
     Ticket,
+    sql::client::{FlightSqlServiceClient, PreparedStatement},
 };
 use futures::TryStreamExt;
 use tonic::transport::{Certificate, Channel, ClientTlsConfig, Endpoint};
