@@ -2,7 +2,7 @@ use std::process::exit;
 use std::sync::Arc;
 
 use arrow_array::{
-    Float32Array, Int32Array, Int64Array, Int8Array, RecordBatch, TimestampMillisecondArray,
+    Float32Array, Int8Array, Int32Array, Int64Array, RecordBatch, TimestampMillisecondArray,
 };
 use arrow_cast::pretty::pretty_format_batches;
 use arrow_schema::{DataType, Field, Schema, TimeUnit};
