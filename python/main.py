@@ -128,6 +128,8 @@ def main():
     # 1 2024-09-03 10:05:00+08:00    2   11.6     1
     print(result)
 
+    print("\nFinished, thank you!")
+
 
 if __name__ == "__main__":
     main()

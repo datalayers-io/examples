@@ -146,5 +146,7 @@ async fn main() -> Result<()> {
     // +---------------------------+-----+-------+------+
     print_batches(&result);
 
+    println!("\nFinished, thank you!");
+
     Ok(())
 }
