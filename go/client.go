@@ -123,7 +123,7 @@ func (client *Client) Execute(sql string) ([]arrow.Record, error) {
 	return client.doGet(flightInfo.GetEndpoint()[0].GetTicket())
 }
 
-// ExecuteUpdate the sql on Datalayers and returns the affected rows.
+// ExecuteUpdate executes the sql on Datalayers and returns the affected rows.
 // The supported sqls are Insert and Delete. Note, the development for supporting Delete is in progress.
 func (client *Client) ExecuteUpdate(sql string) (int64, error) {
 	ctx, cancel := client.timeoutContext()
