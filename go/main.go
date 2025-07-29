@@ -42,7 +42,7 @@ func main() {
 	// The Datalayers server uses this header to identify the associated table of a request.
 	// This setting is optional since the following SQLs contain the database context
 	// and the server could parse the database context from SQLs.
-	client.UseDatabase("go")
+	dbClient := client.UseDatabase("go")
 
 	// Creates a table `demo` within the database `go`.
 	sql = `
@@ -55,7 +55,7 @@ func main() {
     )
     PARTITION BY HASH(sid) PARTITIONS 8
     ENGINE=TimeSeries;`
-	result, err = client.Execute(sql)
+	result, err = dbClient.Execute(sql)
 	if err != nil {
 		fmt.Println("Failed to create table: ", err)
 		return
@@ -83,7 +83,7 @@ func main() {
 
 	// Queries the inserted data.
 	sql = "SELECT * FROM go.demo"
-	result, err = client.Execute(sql)
+	result, err = dbClient.Execute(sql)
 	if err != nil {
 		fmt.Println("Failed to scan data: ", err)
 		return
@@ -99,13 +99,13 @@ func main() {
 
 	// Inserts some data into the `demo` table with prepared statement.
 	sql = "INSERT INTO go.demo (ts, sid, value, flag) VALUES (?, ?, ?, ?);"
-	preparedStmt, err := client.Prepare(sql)
+	preparedStmt, err := dbClient.Prepare(sql)
 	if err != nil {
 		fmt.Println("Failed to create a insert prepared statement: ", err)
 		return
 	}
 	binding := MakeInsertBinding()
-	result, err = client.ExecutePrepared(preparedStmt, binding)
+	result, err = dbClient.ExecutePrepared(preparedStmt, binding)
 	if err != nil {
 		fmt.Println("Failed to execute a insert prepared statement: ", err)
 		return
@@ -116,7 +116,7 @@ func main() {
 
 	// Queries the inserted data with prepared statement.
 	sql = "SELECT * FROM go.demo WHERE sid = ?"
-	preparedStmt, err = client.Prepare(sql)
+	preparedStmt, err = dbClient.Prepare(sql)
 	if err != nil {
 		fmt.Println("Failed to create a select prepared statement: ", err)
 		return
@@ -124,7 +124,7 @@ func main() {
 
 	// Retrieves all rows with `sid` = 1.
 	binding = MakeQueryBinding(1)
-	result, err = client.ExecutePrepared(preparedStmt, binding)
+	result, err = dbClient.ExecutePrepared(preparedStmt, binding)
 	if err != nil {
 		fmt.Println("Failed to execute a select prepared statement: ", err)
 		return
@@ -137,7 +137,7 @@ func main() {
 
 	// Retrieves all rows with `sid` = 1.
 	binding = MakeQueryBinding(2)
-	result, err = client.ExecutePrepared(preparedStmt, binding)
+	result, err = dbClient.ExecutePrepared(preparedStmt, binding)
 	if err != nil {
 		fmt.Println("Failed to execute a select prepared statement: ", err)
 		return
@@ -149,7 +149,7 @@ func main() {
 	PrintRecords(result)
 
 	// Closes the prepared statement to notify releasing resources on server side.
-	if err = client.ClosePrepared(preparedStmt); err != nil {
+	if err = dbClient.ClosePrepared(preparedStmt); err != nil {
 		fmt.Println("Failed to close a prepared statement: ", err)
 		return
 	}
@@ -162,7 +162,7 @@ func main() {
         INSERT INTO go.demo (ts, sid, value, flag) VALUES
             ('2024-09-03T10:00:00+08:00', 1, 4.5, 0),
             ('2024-09-03T10:05:00+08:00', 2, 11.6, 1);`
-	affectedRows, err := client.ExecuteUpdate(sql)
+	affectedRows, err := dbClient.ExecuteUpdate(sql)
 	if err != nil {
 		fmt.Println("Failed to insert data: ", err)
 		return
@@ -173,7 +173,7 @@ func main() {
 
 	// Checks that the data are inserted successfully.
 	sql = "SELECT * FROM go.demo where ts >= '2024-09-03T10:00:00+08:00'"
-	result, err = client.Execute(sql)
+	result, err = dbClient.Execute(sql)
 	if err != nil {
 		fmt.Println("Failed to scan data: ", err)
 		return
