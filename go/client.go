@@ -135,7 +135,7 @@ func (client *Client) ExecuteUpdate(sql string) (int64, error) {
 	return affectedRows, nil
 }
 
-// Prepare Creates a prepared statement.
+// Prepare creates a prepared statement.
 func (client *Client) Prepare(sql string) (*flightsql.PreparedStatement, error) {
 	ctx, cancel := client.timeoutContext()
 	stmt, err := client.inner.Prepare(ctx, sql)
