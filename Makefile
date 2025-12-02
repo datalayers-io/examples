@@ -19,6 +19,11 @@ java:
 	@echo "Running Java examples..."
 	@echo "Sorry, Java is not supported for now"
 
+.PHONY: pg
+pg:
+	@echo "Running PostgreSQL examples..."
+	@bash -c "cd postgresql/go && go build && ./main && cd ../.."
+
 .PHONY: build
 build:
 	@echo "Building..."
@@ -39,5 +44,6 @@ help:
 	@echo "  python    - Run Python examples"
 	@echo "  rust      - Run Rust examples"
 	@echo "  java      - Run Java examples"
+	@echo "  pg        - Run PostgreSQL examples"
 	@echo "  build     - Build for all languages"
 	@echo "  format    - Format code for all languages"
