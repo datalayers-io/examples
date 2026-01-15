@@ -168,7 +168,7 @@ func (client *Client) ClosePrepared(preparedStmt *flightsql.PreparedStatement) e
 func (client *Client) doGet(ticket *flight.Ticket) ([]arrow.Record, error) {
 	ctx, cancel := client.timeoutContext()
 	reader, err := client.inner.DoGet(ctx, ticket)
-	cancel()
+	defer cancel()
 	if err != nil {
 		return nil, fmt.Errorf("failed to perform DoGet: %v", err)
 	}

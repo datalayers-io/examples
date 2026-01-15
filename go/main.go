@@ -28,7 +28,7 @@ func main() {
 	}
 
 	// Creates a database `go`.
-	sql := "CREATE DATABASE go;"
+	sql := "CREATE DATABASE if not exists go;"
 	result, err := client.Execute(sql)
 	if err != nil {
 		fmt.Println("Failed to create database: ", err)
@@ -46,7 +46,7 @@ func main() {
 
 	// Creates a table `demo` within the database `go`.
 	sql = `
-    CREATE TABLE go.demo (
+    CREATE TABLE if not exists go.demo (
         ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         sid INT32,
         value REAL,
@@ -146,6 +146,21 @@ func main() {
 	//                               ts   sid   value   flag
 	//    2024-09-01 10:05:00 +0800 CST     2   15.30      1
 	//    2024-09-02 10:05:00 +0800 CST     2   15.30      1
+	PrintRecords(result)
+
+	sql = "SELECT * FROM go.demo WHERE sid in (?, ?, ?)"
+	preparedStmt, err = dbClient.Prepare(sql)
+	if err != nil {
+		fmt.Println("Failed to create a select prepared statement: ", err)
+		return
+	}
+	// Retrieves all rows where `sid` in (1, 2, 3).
+	binding = MakeMultiBinding([]int32{1, 2, 3})
+	result, err = dbClient.ExecutePrepared(preparedStmt, binding)
+	if err != nil {
+		fmt.Println("Failed to execute a select prepared statement: ", err)
+		return
+	}
 	PrintRecords(result)
 
 	// Closes the prepared statement to notify releasing resources on server side.

@@ -132,6 +132,31 @@ func MakeQueryBinding(sid int32) arrow.Record {
 	return record
 }
 
+func MakeMultiBinding(sids []int32) arrow.Record {
+	sidBuilder := array.NewInt32Builder(memory.NewGoAllocator())
+	defer sidBuilder.Release()
+	sidBuilder.Append(1)
+	sidArray1 := sidBuilder.NewArray()
+
+	sidBuilder = array.NewInt32Builder(memory.NewGoAllocator())
+	defer sidBuilder.Release()
+	sidBuilder.Append(2)
+	sidArray2 := sidBuilder.NewArray()
+
+	sidBuilder = array.NewInt32Builder(memory.NewGoAllocator())
+	defer sidBuilder.Release()
+	sidBuilder.Append(3)
+	sidArray3 := sidBuilder.NewArray()
+
+	schema := arrow.NewSchema([]arrow.Field{
+		{Name: "sid", Type: arrow.PrimitiveTypes.Int32, Nullable: true},
+		{Name: "sid", Type: arrow.PrimitiveTypes.Int32, Nullable: true},
+		{Name: "sid", Type: arrow.PrimitiveTypes.Int32, Nullable: true},
+	}, nil)
+	record := array.NewRecord(schema, []arrow.Array{sidArray1, sidArray2, sidArray3}, 1)
+	return record
+}
+
 func releaseRecords(records []arrow.Record) {
 	for _, record := range records {
 		record.Release()
