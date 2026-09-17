@@ -1,3 +1,6 @@
 flightsql-dbapi==0.2.2
 pandas==2.2.3
-pyarrow==17.0.0
+pyarrow==20.0.0
+numpy==1.26.4
+protobuf==4.25.3
+sqlalchemy==1.4.54
